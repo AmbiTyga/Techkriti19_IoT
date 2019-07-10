@@ -1,0 +1,91 @@
+/*TEAM TECHNOVIA
+ 
+  Connect 5VT to D9 and 5VR to D10
+  Feed GSM SIM900A with Arduino's 5V
+
+  Code by IRI
+*/
+
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(9, 10);
+char msg;
+char call;
+
+void setup()
+{
+  mySerial.begin(9600);   // Sets Baud rate of GSM Module  
+  Serial.begin(9600);    // Sets Baud rate of Serial Monitor (Arduino)
+  Serial.println("Team Technovia");
+  
+  mySerial.println("AT+GSMBUSY=1");    //Sets the GSM Module in Call Rejection Mode
+  delay(1000);  // Delay of 1000 milli seconds or 1 second
+
+  // Project Embedded // Techkriti
+   mySerial.println("AT+CMGF=1");    //Sets the GSM Module in Text Mode
+  delay(1000);  // Delay of 1000 milli seconds or 1 second
+  mySerial.println("AT+CMGS=\"+918544110021\"\r"); // Replace x with mobile number
+  delay(1000);
+  mySerial.println("*Hola! Your Device is Ready! *");// The SMS text you want to send
+  delay(100);
+   mySerial.println((char)26);// ASCII code of CTRL+Z
+  delay(1000);
+
+  
+  Serial.println("Type <s> to send a text");
+  Serial.println("s : to send message");
+  Serial.println("d : to delete message");
+
+
+  Serial.println();
+  delay(100);
+}
+
+void loop()
+{  
+  if (Serial.available()>0)
+   switch(Serial.read())
+  {
+    case 's':
+      SendMessage();
+      break;
+ 
+    case 'd':
+    Delete();
+    break;
+
+ if (mySerial.available()>0)
+ Serial.write(mySerial.read());
+}
+}
+
+void SendMessage()
+{
+  mySerial.println("AT+CMGF=1");    //Sets the GSM Module in Text Mode
+  delay(1000);  // Delay of 1000 milli seconds or 1 second
+  mySerial.println("AT+CMGS=\"+918544110021\"\r"); // Replace x with mobile number
+  delay(1000);
+  mySerial.println("* Team Technovia : Pro, Aka, Ambi, Iri *");// The SMS text you want to send
+  delay(100);
+   mySerial.println((char)26);// ASCII code of CTRL+Z
+  delay(1000);
+}
+
+void ReceiveMessage()
+{
+  mySerial.println("AT+CNMI=2,2,0,0,0"); // AT Command to recieve a live SMS
+  delay(1000);
+  if (mySerial.available()>0)
+  {
+    msg=mySerial.read();
+    Serial.print(msg);
+  }
+}
+
+void Delete()
+{
+  // use this to reset memory of simcard in the setup
+  Serial.println("WE DELETED ALL YOUR MESSAGES.");
+  mySerial.println("AT+CMGD=ALL");    //Sets the GSM Module in DEL ALL MSGS.
+  delay(1000);  // Delay of 1000 milli seconds or 1 second
+}
+
